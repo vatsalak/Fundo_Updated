@@ -1,20 +1,8 @@
-import express, { IRouter } from 'express';
-const router = express.Router();
+import { Router } from 'express';
+import { registerUser} from '../controllers/user.controller'; // Adjust the path accordingly
 
-import userRoute from './user.route';
+const router = Router();
 
-/**
- * Function contains Application routes
- *
- * @returns router
- */
-const routes = (): IRouter => {
-  router.get('/', (req, res) => {
-    res.json('Welcome');
-  });
-  router.use('/users', new userRoute().getRoutes());
-
-  return router;
-};
-
-export default routes;
+router.post('/register', registerUser); // Assuming you want to register at /api/v1/register
+//router.post('/login', loginUser);
+export default router;

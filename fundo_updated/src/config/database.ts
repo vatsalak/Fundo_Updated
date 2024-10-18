@@ -2,31 +2,20 @@ import mongoose from 'mongoose';
 import Logger from './logger';
 
 class Database {
-  private DATABASE: string;
-  private logger;
-
-  constructor() {
-    // Replace database value in the .env file with your database config url
-    this.DATABASE =
-      process.env.NODE_ENV === 'test'
-        ? process.env.DATABASE_TEST
-        : process.env.DATABASE;
-
-    this.logger = Logger.logger;
-  }
-
-  public initializeDatabase = async (): Promise<void> => {
+  public async initializeDatabase(): Promise<void> {
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/register-login-db';
+    
     try {
-      await mongoose.connect(this.DATABASE, {
-        useFindAndModify: false,
-        useCreateIndex: true,
+      await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useUnifiedTopology: true
       });
-      this.logger.info('Connected to the database.');
+      Logger.logger.info('MongoDB connected successfully');
     } catch (error) {
-      this.logger.error('Could not connect to the database.', error);
+      Logger.logger.error('MongoDB connection failed', error);
+      process.exit(1);
     }
-  };
+  }
 }
+
 export default Database;

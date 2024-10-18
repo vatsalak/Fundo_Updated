@@ -5,11 +5,10 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-import routes from './routes';
+import routes from './routes'; // Make sure this path is correct
 import Database from './config/database';
 import ErrorHandler from './middlewares/error.middleware';
 import Logger from './config/logger';
-
 import morgan from 'morgan';
 
 class App {
@@ -25,9 +24,9 @@ class App {
 
   constructor() {
     this.app = express();
-    this.host = process.env.APP_HOST;
-    this.port = process.env.APP_PORT;
-    this.api_version = process.env.API_VERSION;
+    this.host = process.env.APP_HOST || 'localhost'; // Default value
+    this.port = process.env.APP_PORT || 5000; // Default value
+    this.api_version = process.env.API_VERSION || 'v1'; // Default value
 
     this.initializeMiddleWares();
     this.initializeRoutes();
@@ -49,7 +48,7 @@ class App {
   }
 
   public initializeRoutes(): void {
-    this.app.use(`/api/${this.api_version}`, routes());
+    this.app.use(`/api/${this.api_version}`, routes); // Use routes directly
   }
 
   public initializeErrorHandlers(): void {
