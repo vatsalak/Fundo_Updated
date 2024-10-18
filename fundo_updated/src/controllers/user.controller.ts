@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-//import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import User from '../models/user.model'; // Ensure this path is correct
 import { IUser } from '../interfaces/user.interface';
 
@@ -14,14 +14,14 @@ export const registerUser = async (req: Request, res: Response) => {
         }
 
         // Hash the password
-   //     const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create a new user
         const newUser: IUser = new User({
             firstName,
             lastName,
             email,
-            password //hashedPassword,
+            password: hashedPassword,
         });
 
         // Save the new user to the database
@@ -35,23 +35,32 @@ export const registerUser = async (req: Request, res: Response) => {
     }
 };
 export const loginUser = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  try {
-      // Check if the user exists
-      const user = await User.findOne({ email });
-      if (!user) {
-          return res.status(400).json({ message: 'User does not exist' });
-      }
+    try {
+        // Find the user by email
+        const user: IUser | null = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email ' });
+        }
 
-      // Compare raw (plaintext) password with the stored password
-      if (password !== user.password) {
-          return res.status(400).json({ message: 'Invalid password' });
-      }
+        // Compare the password with the hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalids password' });
+        }
 
-      // If login is successful, return a success message or token
-      res.status(200).json({ message: 'Login successful' });
-  } catch (error) {
-      res.status(500).json({ message: 'Server error', error });
-  }
+        // If login is successful, send a success message (you may also want to send back user data or a token)
+        res.status(200).json({
+            message: 'Login successful',
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
 };
