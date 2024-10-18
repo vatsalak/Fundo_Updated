@@ -34,4 +34,24 @@ export const registerUser = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+export const loginUser = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
 
+  try {
+      // Check if the user exists
+      const user = await User.findOne({ email });
+      if (!user) {
+          return res.status(400).json({ message: 'User does not exist' });
+      }
+
+      // Compare raw (plaintext) password with the stored password
+      if (password !== user.password) {
+          return res.status(400).json({ message: 'Invalid password' });
+      }
+
+      // If login is successful, return a success message or token
+      res.status(200).json({ message: 'Login successful' });
+  } catch (error) {
+      res.status(500).json({ message: 'Server error', error });
+  }
+};
