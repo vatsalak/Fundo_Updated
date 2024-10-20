@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model'; // Ensure this path is correct
 import { IUser } from '../interfaces/user.interface';
+import { generateToken } from '../utils/generateToken'; // Import the function here
 
 export const registerUser = async (req: Request, res: Response) => {
     const { firstName, lastName, email, password } = req.body;
@@ -28,10 +29,11 @@ export const registerUser = async (req: Request, res: Response) => {
         await newUser.save();
 
         // Respond with a success message
-        res.status(201).json({ message: 'User registered successfully' });
+        const token = generateToken(newUser._id);
+
+        res.status(201).json({ message: 'User registered', token }); // Include the token in the response
     } catch (error) {
-        console.error(error); // Log the error for debugging
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: 'Server error', error });
     }
 };
 export const loginUser = async (req: Request, res: Response) => {
@@ -51,6 +53,8 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         // If login is successful, send a success message (you may also want to send back user data or a token)
+       
+        const token = generateToken(user._id.toString()); 
         res.status(200).json({
             message: 'Login successful',
             user: {
@@ -59,6 +63,7 @@ export const loginUser = async (req: Request, res: Response) => {
                 lastName: user.lastName,
                 email: user.email,
             },
+            token
         });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });
