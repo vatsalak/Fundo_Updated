@@ -4,12 +4,13 @@ dotenv.config();
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 
-import routes from './routes'; // Make sure this path is correct
+import routes from './routes'; // Import main routes if applicable
+import noteRoutes from './routes/note.route'; // Import the note routes
 import Database from './config/database';
 import ErrorHandler from './middlewares/error.middleware';
 import Logger from './config/logger';
-import morgan from 'morgan';
 
 class App {
   public app: Application;
@@ -29,7 +30,7 @@ class App {
     this.api_version = process.env.API_VERSION || 'v1'; // Default value
 
     this.initializeMiddleWares();
-    this.initializeRoutes();
+    this.initializeRoutes(); // This will call the routes including note routes
     this.initializeDatabase();
     this.initializeErrorHandlers();
     this.startApp();
@@ -48,7 +49,10 @@ class App {
   }
 
   public initializeRoutes(): void {
-    this.app.use(`/api/${this.api_version}`, routes); // Use routes directly
+    // You can define your main routes here, including note routes
+    this.app.use(`/api/${this.api_version}/notes`, noteRoutes); // Use note routes here
+    // If you have other routes to add, you can add them similarly
+    // this.app.use(`/api/${this.api_version}`, routes); 
   }
 
   public initializeErrorHandlers(): void {
