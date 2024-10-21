@@ -3,7 +3,7 @@ import Logger from './logger';
 
 class Database {
   public async initializeDatabase(): Promise<void> {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/register-login-db';
+    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/register-login-db'||'mongodb://localhost:27017/note-db';
     
     try {
       await mongoose.connect(mongoUri, {
@@ -17,5 +17,11 @@ class Database {
     }
   }
 }
+// config/database.ts
+
+
+
+
+
 
 export default Database;

@@ -1,21 +1,22 @@
-// note.model.ts
-import { Document, Schema, model } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 export interface INote extends Document {
-    _id: string; // Optional, as Mongoose can handle this for you
+    _id: string; // Optional
     title: string;
-    content: string;
+    content: string|any;
     createdAt: Date;
     updatedAt: Date;
+    archived: boolean; // New field
+    trashed: boolean; // New field
 }
 
-const NoteSchema: Schema = new Schema({
+const noteSchema = new Schema<INote>({
     title: { type: String, required: true },
     content: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    archived: { type: Boolean, default: false }, // Default is false
+    trashed: { type: Boolean, default: false }, // Default is false
 });
 
-// Create and export the Mongoose model
-const Note = model<INote>('Note', NoteSchema);
-export default Note;
+export default model<INote>('Note', noteSchema);

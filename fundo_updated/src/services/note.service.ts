@@ -1,25 +1,58 @@
-// note.service.ts
-import Note from '../models/note.model';
-import { INote } from '../interfaces/note.interface';
+// src/services/note.service.ts
+import Note from '../models/note.model'; // Adjust the import based on your folder structure
+import { INote } from '../interfaces/note.interface'; // Adjust the import based on your folder structure
 
-export class NoteService {
-    async createNote(data: INote) {
-        const newNote = new Note(data);
-        await newNote.save();
-        return newNote;
-    }
-
-    async getAllNotes() {
-        return await Note.find();
-    }
-
-    async updateNote(id: string, data: Partial<INote>) {
-        return await Note.findByIdAndUpdate(id, data, { new: true });
-    }
-
-    async deleteNote(id: string) {
-        return await Note.findByIdAndDelete(id);
-    }
+// Create a new note
+export interface CreateNoteInput {
+    title: string;
+    content: string;
 }
 
-export default new NoteService();
+// Create a new note and save it to the database
+export const createNote = async (data: CreateNoteInput): Promise<INote> => {
+    const newNote = new Note({
+        title: data.title,
+        content: data.content,
+        createdAt: new Date(), // Add createdAt and updatedAt timestamps
+        updatedAt: new Date(),
+    });
+
+    return await newNote.save(); // Save and return the note instance
+};
+
+
+
+// Get all notes
+export const getAllNotes = async () => {
+    return await Note.find({});
+};
+
+// Update a note
+export const updateNote = async (id: string, data: Partial<INote>) => {
+    return await Note.findByIdAndUpdate(id, data, { new: true });
+};
+
+// Delete a note
+export const deleteNote = async (id: string) => {
+    return await Note.findByIdAndDelete(id);
+};
+
+// Archive a note
+export const archiveNote = async (id: string) => {
+    return await Note.findByIdAndUpdate(id, { archived: true }, { new: true });
+};
+
+// Trash a note
+export const trashNote = async (id: string) => {
+    return await Note.findByIdAndUpdate(id, { trashed: true }, { new: true });
+};
+
+// Get archived notes
+export const getArchivedNotes = async () => {
+    return await Note.find({ archived: true });
+};
+
+// Get trashed notes
+export const getTrashedNotes = async () => {
+    return await Note.find({ trashed: true });
+};
