@@ -3,6 +3,8 @@ import HttpStatus from 'http-status-codes';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
+
+
 /**
  * Middleware to authenticate if user has a valid Authorization token
  * Authorization: Bearer <token>
@@ -50,15 +52,3 @@ export const userAuth = async (
 };
 
 
-export const authenticate = (req, res, next) => {
-  const token = req.header('Authorization').replace('Bearer ', '');
-  if (!token) return res.status(401).json({ message: 'Access denied' });
-
-  try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    next();
-  } catch (error) {
-    res.status(400).json({ message: 'Invalid token' });
-  }
-};
