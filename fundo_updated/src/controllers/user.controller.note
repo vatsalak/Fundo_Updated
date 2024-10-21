@@ -1,0 +1,48 @@
+# File: controller.ts
+# Date: 2024-10-20
+# Author: [VATSALA]
+# Project: [fundo_updated]
+
+## Purpose:
+This file contains two primary controller functions:
+1. registerUser: Handles the registration of new users, including password hashing and storing user information in the database.
+2. loginUser: Manages user authentication by verifying email and password, and generating a token upon successful login.
+
+## Key Methods:
+### 1. `registerUser(req: Request, res: Response)`:
+   - Input: Receives `firstName`, `lastName`, `email`, and `password` from the request body.
+   - Process:
+     - Checks if a user with the provided email already exists.
+     - Hashes the password using `bcrypt`.
+     - Creates a new `User` document and saves it in the MongoDB database.
+     - Generates an authentication token for the user.
+   - **Output**: Returns a success message along with a JWT token if the registration is successful, or an error message if registration fails (e.g., user already exists).
+
+### 2. `loginUser(req: Request, res: Response)`:
+   - Input: Receives `email` and `password` from the request body.
+   - Process:
+     - Finds the user by email in the database.
+     - Compares the provided password with the hashed password in the database.
+     - Generates an authentication token if the login is successful.
+   - Output: Returns user details (excluding the password) and a JWT token upon successful login, or an error message if authentication fails.
+
+## Dependencies:
+- Express: Used for routing and handling HTTP requests.
+- bcryptjs: Utilized to hash passwords and verify them during login.
+- User Model: MongoDB model for managing user data, imported from `../models/user.model`.
+- JWT Token: Generated using the `generateToken` function, imported from `../utils/generateToken`.
+
+## Future Improvements:
+- Implement additional validation for inputs (e.g., validating email format, password strength).
+- Improve error handling and add more specific error codes/messages.
+- Rate limit login attempts to prevent brute-force attacks.
+- Add tests for these controller functions to ensure reliability.
+
+## Security Considerations:
+- Passwords are hashed using `bcryptjs` with a salt factor of 10.
+- Token-based authentication using JWT ensures that sensitive data is not exposed.
+- Ensure the token generation logic is secure and follows best practices for user sessions.
+
+## Notes:
+- Always validate incoming data before processing it to prevent security risks.
+- Consider using environment variables to manage sensitive data like JWT secret keys.
