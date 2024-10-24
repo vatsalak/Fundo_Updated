@@ -1,12 +1,16 @@
 // note.interface.ts
-import { Document } from 'mongoose';
 
+
+
+import { Schema, model, Document, Types } from 'mongoose';
+
+// Define the INote interface with ObjectId for createdBy
 export interface INote extends Document {
-    _id: string; // Optional, as Mongoose can handle this for you
-    title: string;
-    content: string;
-    createdAt: Date; // Include timestamps in the interface
-    updatedAt: Date;
-    archived: boolean;
-    trashed: boolean;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  archived: boolean;
+  trashed: boolean;
+  createdBy: Types.ObjectId; // Use Types.ObjectId instead of ObjectId
 }

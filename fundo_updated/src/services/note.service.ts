@@ -6,19 +6,22 @@ import { INote } from '../interfaces/note.interface'; // Adjust the import based
 export interface CreateNoteInput {
     title: string;
     content: string;
+    createdBy: string;
 }
 
 // Create a new note and save it to the database
-export const createNote = async (data: CreateNoteInput): Promise<INote> => {
+export const createNote = async (input: CreateNoteInput): Promise<INote> => {
     const newNote = new Note({
-        title: data.title,
-        content: data.content,
-        createdAt: new Date(), // Add createdAt and updatedAt timestamps
+        title: input.title,
+        content: input.content,
+        createdBy: input.createdBy, // Now you can set createdBy
+        createdAt: new Date(),
         updatedAt: new Date(),
     });
 
-    return await newNote.save(); // Save and return the note instance
+    return await newNote.save();
 };
+
 
 
 

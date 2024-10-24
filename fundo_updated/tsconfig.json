@@ -2,13 +2,12 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "allowJs": true,
-    "outDir": "./build",
-    "rootDir": "./src",
+    "strict": true,
     "esModuleInterop": true,
-    "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist" // Output directory for compiled files
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "src/tests"]
+  "include": ["src/**/*"], // Adjust according to your folder structure
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

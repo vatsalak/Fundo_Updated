@@ -11,34 +11,34 @@ class Logger {
       new winston.transports.File({
         filename: 'logs/server/error.log',
         level: 'error',
-        handleExceptions: true
+        handleExceptions: true,
       }),
       new winston.transports.File({
         filename: 'logs/server/all.log',
         level: 'info',
-        handleExceptions: true
+        handleExceptions: true,
       }),
       new winston.transports.DailyRotateFile({
         maxFiles: '14d',
         level: 'info',
         dirname: 'logs/server/daily',
         datePattern: 'YYYY-MM-DD',
-        filename: '%DATE%.log'
+        filename: '%DATE%.log',
       }),
       new winston.transports.Console({
         level: 'debug',
-        handleExceptions: true
-      })
-    ]
+        handleExceptions: true,
+      }),
+    ],
   });
 
   static logStream = {
     /**
      * A writable stream for winston logger.
      *
-     * @param {any} message
+     * @param {string} message - The log message.
      */
-    write(message) {
+    write(message: string) { // Specify the type for message
       /**
        * morganLogger logs all http request in a dedicated file and on console
        */
@@ -48,23 +48,23 @@ class Logger {
           new winston.transports.File({
             filename: 'logs/requests/all.log',
             level: 'debug',
-            handleExceptions: true
+            handleExceptions: true,
           }),
           new winston.transports.Console({
             level: 'debug',
-            handleExceptions: true
+            handleExceptions: true,
           }),
           new winston.transports.DailyRotateFile({
             maxFiles: '14d',
             level: 'info',
             dirname: 'logs/requests/daily',
             datePattern: 'YYYY-MM-DD',
-            filename: '%DATE%.log'
-          })
-        ]
+            filename: '%DATE%.log',
+          }),
+        ],
       });
       morganLogger.info(message.toString());
-    }
+    },
   };
 }
 

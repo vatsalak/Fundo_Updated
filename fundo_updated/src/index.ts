@@ -1,12 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
+import userRoutes from './routes/user.route'; 
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
 
-import routes from './routes'; // Import main routes if applicable
+//simport routes from './routes/index'; 
+// Import main routes if applicable
 import noteRoutes from './routes/note.route'; // Import the note routes
 import Database from './config/database';
 import ErrorHandler from './middlewares/error.middleware';
@@ -34,6 +34,7 @@ class App {
     this.initializeDatabase();
     this.initializeErrorHandlers();
     this.startApp();
+    this.env = process.env.NODE_ENV === 'production'; 
   }
 
   public initializeMiddleWares(): void {
@@ -41,7 +42,6 @@ class App {
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json());
-    this.app.use(morgan('combined', { stream: this.logStream }));
   }
 
   public initializeDatabase(): void {
@@ -50,9 +50,13 @@ class App {
 
   public initializeRoutes(): void {
     // You can define your main routes here, including note routes
-    this.app.use(`/api/${this.api_version}/notes`, noteRoutes); // Use note routes here
+    //te routes here
     // If you have other routes to add, you can add them similarly
     // this.app.use(`/api/${this.api_version}`, routes); 
+    this.app.use('/api/v1', userRoutes);
+    this.app.use(`/api/${this.api_version}/notes`, noteRoutes);
+    
+
   }
 
   public initializeErrorHandlers(): void {

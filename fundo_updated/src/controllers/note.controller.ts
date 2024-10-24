@@ -1,143 +1,95 @@
 import { Request, Response } from 'express';
-import Note from '../models/note.model'; // Ensure this path is correct
-import { INote } from '../interfaces/note.interface';
-import * as NoteService from '../services/note.service'; // Adjust the import path as needed
-
+import Note from '../models/note.model';
+import { AuthRequest } from '../middlewares/auth.middleware';
+import mongoose from 'mongoose'; // Ensure mongoose is imported
 
 // Create a new note
-export const createNote = async (req: Request, res: Response) => {
+export const createNote = async (req: AuthRequest, res: Response) => {
+  try {
     const { title, content } = req.body;
+    const userId = req.user?.id;
 
-    try {
-        // Create a new note using the service
-        const newNote: INote = await NoteService.createNote({
-            title,
-            content,
-        });
-
-        res.status(201).json({ message: 'Note created successfully', note: newNote });
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating note', error });
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
     }
+
+    const newNote = new Note({
+      title,
+      content,
+      createdBy: new mongoose.Types.ObjectId(userId), // Use Types.ObjectId here
+    });
+
+    const savedNote = await newNote.save();
+    return res.status(201).json(savedNote);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error creating note', error });
+  }
 };
 
-// Get all notes
-export const getNotes = async (req: Request, res: Response) => {
-    try {
-        const notes = await Note.find();
-        res.status(200).json(notes);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching notes', error });
+// Get all notes of the logged-in user
+export const getNotes = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID not found in request' });
     }
+
+    const notes = await Note.find({ createdBy: new mongoose.Types.ObjectId(userId) }); // Use Types.ObjectId
+    return res.status(200).json(notes);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error fetching notes', error });
+  }
 };
 
-// Get a single note by ID
-export const getNoteById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+// Update a specific note
+export const updateNote = async (req: AuthRequest, res: Response) => {
+  try {
+    const { noteId } = req.params;
+    const { title, content, archived, trashed } = req.body;
+    const userId = req.user?.id;
 
-    try {
-        const note = await Note.findById(id);
-        if (!note) {
-            return res.status(404).json({ message: 'Note not found' });
-        }
-        res.status(200).json(note);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching note', error });
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
     }
+
+    const updatedNote = await Note.findOneAndUpdate(
+      { _id: noteId, createdBy: new mongoose.Types.ObjectId(userId) },
+      { title, content, archived, trashed },
+      { new: true }
+    );
+
+    if (!updatedNote) {
+      return res.status(404).json({ message: 'Note not found or you are not authorized to update this note' });
+    }
+
+    return res.status(200).json(updatedNote);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error updating note', error });
+  }
 };
 
-// Update a note by ID
-export const updateNote = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { title, content } = req.body;
+// Delete a specific note
+export const deleteNote = async (req: AuthRequest, res: Response) => {
+  try {
+    const { noteId } = req.params;
+    const userId = req.user?.id;
 
-    try {
-        const updatedNote = await Note.findByIdAndUpdate(
-            id,
-            { title, content, updatedAt: new Date() },
-            { new: true } // Return the updated document
-        );
-
-        if (!updatedNote) {
-            return res.status(404).json({ message: 'Note not found' });
-        }
-
-        res.status(200).json({ message: 'Note updated successfully', note: updatedNote });
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating note', error });
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
     }
-};
 
-// Delete a note by ID
-export const deleteNote = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const deletedNote = await Note.findOneAndDelete({
+      _id: noteId,
+      createdBy: new mongoose.Types.ObjectId(userId),
+    });
 
-    try {
-        const deletedNote = await Note.findByIdAndDelete(id);
-
-        if (!deletedNote) {
-            return res.status(404).json({ message: 'Note not found' });
-        }
-
-        res.status(200).json({ message: 'Note deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting note', error });
+    if (!deletedNote) {
+      return res.status(404).json({ message: 'Note not found or you are not authorized to delete this note' });
     }
-};
-export const archiveNote = async (req: Request, res: Response) => {
-    const { id } = req.params;
 
-    try {
-        const note: INote | null = await Note.findById(id);
-        if (!note) {
-            return res.status(404).json({ message: 'Note not found' });
-        }
-
-        // Update the note to set archived to true
-        note.archived = true;
-        await note.save();
-
-        res.status(200).json({ message: 'Note archived successfully', note });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-};
-
-// Trash a note by ID
-export const trashNote = async (req: Request, res: Response) => {
-    const { id } = req.params;
-
-    try {
-        const note: INote | null = await Note.findById(id);
-        if (!note) {
-            return res.status(404).json({ message: 'Note not found' });
-        }
-
-        // Update the note to set trashed to true
-        note.trashed = true;
-        await note.save();
-
-        res.status(200).json({ message: 'Note trashed successfully', note });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-};
-
-// Optionally, you can create methods to get archived or trashed notes
-export const getArchivedNotes = async (req: Request, res: Response) => {
-    try {
-        const archivedNotes = await Note.find({ archived: true });
-        res.status(200).json(archivedNotes);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-};
-
-export const getTrashedNotes = async (req: Request, res: Response) => {
-    try {
-        const trashedNotes = await Note.find({ trashed: true });
-        res.status(200).json(trashedNotes);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
+    return res.status(200).json({ message: 'Note deleted successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error deleting note', error });
+  }
 };
